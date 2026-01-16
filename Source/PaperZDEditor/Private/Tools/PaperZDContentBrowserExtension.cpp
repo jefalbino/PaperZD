@@ -1,7 +1,6 @@
 // Copyright 2017 ~ 2022 Critical Failure Studio Ltd. All rights reserved.
 
 #include "PaperZDContentBrowserExtension.h"
-
 #include "ContentBrowserModule.h"
 #include "PaperZDEditorStyle.h"
 #include "PaperZDExtractFlipbookFromTextureDialog.h"

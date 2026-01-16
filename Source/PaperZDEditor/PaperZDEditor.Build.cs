@@ -30,17 +30,6 @@ public class PaperZDEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private/Graphs"),
                 Path.Combine(ModuleDirectory, "Private/Graphs/Nodes"),
                 Path.Combine(ModuleDirectory, "Private/Graphs/Nodes/Slate"),
-				/*"PaperZDEditor/Private",
-                "PaperZDEditor/Private/Factories",
-                "PaperZDEditor/Private/AssetTypeActions",
-                "PaperZDEditor/Private/Editors",
-                "PaperZDEditor/Private/Editors/Slate",
-                "PaperZDEditor/Private/Editors/Util",
-                "PaperZDEditor/Private/Editors/DetailCustomizations",
-                "PaperZDEditor/Private/Compilers",
-                "PaperZDEditor/Private/Graphs",
-                "PaperZDEditor/Private/Graphs/Nodes",
-                "PaperZDEditor/Private/Graphs/Nodes/Slate",*/
 				// ... add other private include paths required here ...
 			}
 			);
@@ -51,7 +40,6 @@ public class PaperZDEditor : ModuleRules
 			{
 				"Core",
                 "Paper2D",
-                //Check which are needed
                 "UnrealEd",
 				// ... add other public dependencies that you statically link with here ...
 			}

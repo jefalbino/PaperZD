@@ -104,7 +104,6 @@ void FPaperZDEditorModule::RegisterCompiler()
 	FPaperZDAnimBPCompilerContext::RegisterCompileHandleFactory<FPaperZDCompilerFactory_Base>();
 	FPaperZDAnimBPCompilerContext::RegisterCompileHandleFactory<FPaperZDCompilerFactory_StateMachine>();
 	FPaperZDAnimBPCompilerContext::RegisterCompileHandleFactory<FPaperZDCompilerFactory_CacheAnimation>();
-	//FPaperZDAnimBPCompilerContext::RegisterCompileHandleFactory<FPaperZDCompilerFactory_CustomNotify>();
 }
 
 void FPaperZDEditorModule::RegisterSettings()
