@@ -12,6 +12,7 @@ class SSearchableComboBox;
 
 struct FPropertyChangedEvent;
 struct FPaperZDExtractFlipbookSettings;
+struct FPaperZDExtractFlipbooksAnimationSkinSettings;
 
 struct FPaperZDExtractedSprite
 {
@@ -65,6 +66,8 @@ private:
     void OnFinishedChangingProperties(const FPropertyChangedEvent& PropertyChangedEvent);
 
     void InitializeFlipbookExtractSettings(FPaperZDExtractFlipbookSettings& FlipbookSettings);
+
+    void InitializeAnimationSkinSettings(FPaperZDExtractFlipbooksAnimationSkinSettings& SkinSettings);
 
 private:
     UTexture2D* SourceTexture;
