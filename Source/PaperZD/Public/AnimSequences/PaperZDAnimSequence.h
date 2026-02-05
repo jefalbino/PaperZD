@@ -168,9 +168,11 @@ public:
 	virtual float GetFramesPerSecond() const;
 
 	/* Obtains the number of frames on this animation. */
+	UFUNCTION(BlueprintPure, Category = "AnimSequence")
 	virtual int32 GetNumberOfFrames() const;
 
 	/* Obtain the frame number, given the playback time. */
+	UFUNCTION(BlueprintPure, Category = "AnimSequence")
 	int32 GetFrameAtTime(const float Time) const;
 
 	/* Obtain the playback time, given the frame number. */

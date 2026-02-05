@@ -164,7 +164,44 @@ void FPaperZDAnimNode_StateMachine::JumpToNode(FName Name, const FPaperZDAnimati
 	}
 }
 
-void FPaperZDAnimNode_StateMachine::SetState(int32 NewState, const FPaperZDAnimationBaseContext& Context)
+void FPaperZDAnimNode_StateMachine::JumpToState(const FPaperZDAnimStateInfo NewState, const FPaperZDAnimationBaseContext& Context)
+{
+	if (CachedStateMachine && NewState.NodeStateIndex != INDEX_NONE)
+	{
+		SetState(NewState.NodeStateIndex, Context);
+		CurrentStateAnimNode->SetPlaybackTime(NewState.NodeStateTime);
+
+		// FPaperZDAnimationPlaybackData PlaybackData;
+		// CurrentStateAnimNode->Evaluate(PlaybackData);
+		// if (PlaybackData.WeightedAnimations.Num()) 
+		// {
+		// 	const UPaperZDAnimSequence* AnimSequence = PlaybackData.WeightedAnimations[0].AnimSequencePtr.Get();
+		// 	int32 NodeFramePosition = AnimSequence->GetFrameAtTime(NewState.NodeStateTime);
+
+		// 	UE_LOG(LogTemp, Warning, TEXT("NODE state '%d' with frame position '%d'."), NewState.NodeStateIndex, NodeFramePosition);
+
+		// 	CurrentStateAnimNode->SetStartPosition(NodeFramePosition);
+		// 	CurrentStateAnimNode->SetEndPosition(NodeFramePosition + 1);
+		// }
+
+		// Initialize the state
+		FPaperZDAnimationInitContext InitContext(Context.AnimInstance);
+	}
+}
+
+void FPaperZDAnimNode_StateMachine::ResetAllStates(const FPaperZDAnimationBaseContext& Context)
+{
+	if (CachedStateMachine)
+	{
+		for (const FPaperZDAnimStateMachineNode& Node : CachedStateMachine->Nodes)
+		{
+			FPaperZDAnimNode_Base* AnimNode = Context.GetAnimBPClass()->GetAnimNodeByPropertyIndex(Context.AnimInstance, Node.AnimNodeIndex);
+			AnimNode->Reset();
+		}
+	}
+}
+
+void FPaperZDAnimNode_StateMachine::SetState(int32 NewStateIndex, const FPaperZDAnimationBaseContext& Context)
 {
 	//Call the Exit State delegate if it exists
 	if (CachedStateMachine->Nodes.IsValidIndex(CurrentStateIndex) && !CachedStateMachine->Nodes[CurrentStateIndex].OnStateExitEventName.IsNone())
@@ -172,7 +209,7 @@ void FPaperZDAnimNode_StateMachine::SetState(int32 NewState, const FPaperZDAnima
 		CallEvent(CachedStateMachine->Nodes[CurrentStateIndex].OnStateExitEventName, Context);
 	}
 
-	CurrentStateIndex = NewState;
+	CurrentStateIndex = NewStateIndex;
 	CurrentStateAnimNode = Context.GetAnimBPClass()->GetAnimNodeByPropertyIndex(Context.AnimInstance, CachedStateMachine->Nodes[CurrentStateIndex].AnimNodeIndex);
 	CurrentStateTime = 0.0f;
 	CurrentTransitionalAnimNode = nullptr;

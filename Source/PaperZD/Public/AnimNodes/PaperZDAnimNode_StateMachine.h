@@ -2,10 +2,12 @@
 
 #pragma once
 #include "AnimNodes/PaperZDAnimNode_Base.h"
+#include "FPaperZDAnimStateInfo.h"
 #include "PaperZDAnimNode_StateMachine.generated.h"
 
 struct FPaperZDAnimStateMachine;
 struct FPaperZDAnimStateMachineLink;
+struct FPaperZDAnimStateInfo;
 class UPaperZDAnimBPGeneratedClass;
 class UPaperZDAnimSequence;
 
@@ -86,18 +88,30 @@ public:
 	/* Takes the given JumpLink and forcefully sets the new target state to the JumpNode's target. */
 	void JumpToNode(FName Name, const FPaperZDAnimationBaseContext& Context);
 
+	/* Obtain the current index of the state machine linked to this node. */
+	int32 GetCurrentStateIndex() { return CurrentStateIndex; }
+
+	/* Obtain the accumulated time spent on the current state. */
+	float GetCurrentStateTime() { return CurrentStateTime; }
+
+	/* Jump to the state given the state index linked to this state machine. */
+	void JumpToState(const FPaperZDAnimStateInfo NewState, const FPaperZDAnimationBaseContext& Context);
+
+	/** Reset all states of the state machine linked to this node. */
+	void ResetAllStates(const FPaperZDAnimationBaseContext& Context);
+
+	/* Returns the current AnimNode that should be updated/evaluated. */
+	FPaperZDAnimNode_Base* GetCurrentAnimNode() const { return CurrentTransitionalAnimNode ? CurrentTransitionalAnimNode : CurrentStateAnimNode; }
+
 private:
 	/* Sets the given state, triggering any delegate and adding the state's AnimNode to the queue. */
-	void SetState(int32 NewState, const FPaperZDAnimationBaseContext& Context);
+	void SetState(int32 NewStateIndex, const FPaperZDAnimationBaseContext& Context);
 
 	/* True if the given node can be entered (its a state or a valid conduit). */
 	bool CanEnterNode(int32 NodeIndex, const FNodeEvaluationContext& EvaluationContext) const;
 
 	/* Check the list of transitions on the given node and return whether any of the transitions can be taken. */
 	const FPaperZDAnimStateMachineLink* CheckValidTransition(int32 NodeIndex, FNodeEvaluationContext& EvaluationContext) const;
-
-	/* Returns the current AnimNode that should be updated/evaluated. */
-	FPaperZDAnimNode_Base* GetCurrentAnimNode() const { return CurrentTransitionalAnimNode ? CurrentTransitionalAnimNode : CurrentStateAnimNode; }
 
 	/* Calls the given event on the AnimInstance that owns this state machine. */
 	void CallEvent(FName Name, const FPaperZDAnimationBaseContext& Context);

@@ -6,6 +6,7 @@
 #include "Templates/SubclassOf.h"
 #include "IPaperZDAnimInstanceManager.h"
 #include "AnimSequences/Players/PaperZDAnimationPlaybackData.h"
+#include "FPaperZDAnimStateInfo.h"
 #include "PaperZDAnimInstance.generated.h"
 
 class UPaperZDAnimSequence;
@@ -15,6 +16,7 @@ class UWorld;
 class UFunction;
 class APaperZDCharacter;
 struct FPaperZDAnimNode_Sink;
+struct FPaperZDAnimStateInfo;
 
 //Delegate declarations
 DECLARE_DELEGATE_OneParam(FZDOnAnimationOverrideEndSignature, bool /* bCompleted */);
@@ -143,6 +145,18 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "PaperZD")
 	void JumpToNode(FName JumpName, FName StateMachineName = NAME_None);
+
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	void JumpToState(FPaperZDAnimStateInfo NewState, FName StateMachineName = NAME_None);
+
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	void ResetAllStates(FName StateMachineName = NAME_None);
+
+	/**
+	 * Get current animation state and node info being evaluated
+	 */
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	FPaperZDAnimStateInfo GetCurrentStateInfo(FName StateMachineName = NAME_None);
 
 	/* Obtains the current player, responsible of storing the playback information of this AnimInstance. */
 	UFUNCTION(BlueprintPure, Category = "PaperZD|Playback")
