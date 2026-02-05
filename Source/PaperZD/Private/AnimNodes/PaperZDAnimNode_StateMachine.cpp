@@ -171,19 +171,6 @@ void FPaperZDAnimNode_StateMachine::JumpToState(const FPaperZDAnimStateInfo NewS
 		SetState(NewState.NodeStateIndex, Context);
 		CurrentStateAnimNode->SetPlaybackTime(NewState.NodeStateTime);
 
-		// FPaperZDAnimationPlaybackData PlaybackData;
-		// CurrentStateAnimNode->Evaluate(PlaybackData);
-		// if (PlaybackData.WeightedAnimations.Num()) 
-		// {
-		// 	const UPaperZDAnimSequence* AnimSequence = PlaybackData.WeightedAnimations[0].AnimSequencePtr.Get();
-		// 	int32 NodeFramePosition = AnimSequence->GetFrameAtTime(NewState.NodeStateTime);
-
-		// 	UE_LOG(LogTemp, Warning, TEXT("NODE state '%d' with frame position '%d'."), NewState.NodeStateIndex, NodeFramePosition);
-
-		// 	CurrentStateAnimNode->SetStartPosition(NodeFramePosition);
-		// 	CurrentStateAnimNode->SetEndPosition(NodeFramePosition + 1);
-		// }
-
 		// Initialize the state
 		FPaperZDAnimationInitContext InitContext(Context.AnimInstance);
 	}
