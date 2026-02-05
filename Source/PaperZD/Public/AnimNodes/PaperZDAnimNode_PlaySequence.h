@@ -41,11 +41,30 @@ public:
 	virtual void OnInitialize(const FPaperZDAnimationInitContext& InitContext) override;
 	virtual void OnUpdate(const FPaperZDAnimationUpdateContext& UpdateContext) override;
 	virtual void OnEvaluate(FPaperZDAnimationPlaybackData& OutData) override;
+
+	virtual UPaperZDAnimSequence* GetAnimSequence() const override { return AnimSequence; }
+	virtual void SetPlaybackTime(float NewPlaybackTime) override;
+	virtual void Reset() override;
 	//~End FPaperZDAnimNode_Base Interface
 
-	/* Obtain the AnimSequence bound to this play node. */
-	UPaperZDAnimSequence* GetAnimSequence() const { return AnimSequence; }
+	/* Set the start position of the playback. */
+	void SetStartPosition(float NewStartPosition);
+
+	/* Set if playback will loop. */
+	void SetLoopAnimation(bool NewBLoopAnimation);
 
 	/* Obtain the current playback marker time. */
 	float GetPlaybackTime() const { return PlaybackTime; }
+
+    /* Obtain the total duration of the node */
+	float GetTotalDuration() const;
+
+	/* Obtain the current start position */
+	float GetStartPosition() { return StartPosition; }
+
+	/* Obtain loop animation status. */
+	bool GetLoopAnimation() { return bLoopAnimation; }
+
+private:
+	void InitPositions();
 };

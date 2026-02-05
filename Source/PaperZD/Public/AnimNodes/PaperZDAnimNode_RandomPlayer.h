@@ -96,6 +96,15 @@ public:
 	virtual void OnInitialize(const FPaperZDAnimationInitContext& InitContext) override;
 	virtual void OnUpdate(const FPaperZDAnimationUpdateContext& UpdateContext) override;
 	virtual void OnEvaluate(FPaperZDAnimationPlaybackData& OutData) override;
+
+	/* Obtain the AnimSequence bound to this play node. */
+	virtual UPaperZDAnimSequence* GetAnimSequence() const override { 
+		if (Entries.IsValidIndex(CurrentEntryIdx)) 
+		{
+			return Entries[CurrentEntryIdx].AnimSequence;
+		}
+		return nullptr; 
+	}
 	//~End FPaperZDAnimNode_Base Interface
 
 private:

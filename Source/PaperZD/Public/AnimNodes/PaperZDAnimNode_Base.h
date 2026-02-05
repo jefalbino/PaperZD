@@ -5,6 +5,7 @@
 #include "PaperZDAnimNode_Base.generated.h"
 
 struct FPaperZDAnimNode_Base;
+class UPaperZDAnimSequence;
 class UPaperZDAnimInstance;
 class UPaperZDAnimBPGeneratedClass;
 
@@ -181,6 +182,15 @@ public:
 
 	/* Evaluates the node data to obtain the final Animation Data structure to be output. */
 	void Evaluate(FPaperZDAnimationPlaybackData& OutAnimationData);
+
+	/* Obtain the AnimSequence bound to this node. */
+	virtual UPaperZDAnimSequence* GetAnimSequence() const { return nullptr; }
+
+	/* Set animation playback time at runtime */
+	virtual void SetPlaybackTime(float NewPlaybackTime) {};
+
+	/* Reset the playback at runtime. */
+	virtual void Reset() {}
 
 protected:
 	/* Initialize method for the AnimNode, called once when the AnimInstance initializes itself. */

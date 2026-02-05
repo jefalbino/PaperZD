@@ -146,6 +146,34 @@ APaperZDCharacter* UPaperZDAnimInstance::GetPaperCharacter() const
 	return Cast<APaperZDCharacter>(GetOwningActor());
 }
 
+FPaperZDAnimStateInfo UPaperZDAnimInstance::GetCurrentStateInfo(FName StateMachineName /* = NAME_None */)
+{
+	FPaperZDAnimStateInfo State;
+	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
+	if (AnimClass)
+	{
+		FPaperZDAnimationBaseContext Context(this);
+		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))
+		{
+			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
+			{
+				FPaperZDAnimNode_Base* CurrentAnimNode = StateMachineNode->GetCurrentAnimNode();
+				if (CurrentAnimNode) {
+
+					FPaperZDAnimNode_PlaySequence* PlaySequenceNode = static_cast<FPaperZDAnimNode_PlaySequence*>(CurrentAnimNode);
+					
+					State.StateMachineName = StateMachineName;
+					State.NodeStateIndex = StateMachineNode->GetCurrentStateIndex();
+					State.NodeStateTime = StateMachineNode->GetCurrentStateTime();
+
+					return State;
+				}
+			}
+		}
+	}
+	return State;
+}
+
 void UPaperZDAnimInstance::JumpToNode(FName JumpName, FName StateMachineName /* = NAME_None */)
 {
 	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
@@ -162,6 +190,40 @@ void UPaperZDAnimInstance::JumpToNode(FName JumpName, FName StateMachineName /* 
 			else if (StateMachineName == NAME_None)
 			{ 
 				StateMachineNode->JumpToNode(JumpName, Context);
+			}
+		}
+	}
+}
+
+void UPaperZDAnimInstance::JumpToState(FPaperZDAnimStateInfo NewState, FName StateMachineName /* = NAME_None */)
+{
+	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
+	if (AnimClass)
+	{
+		FPaperZDAnimationBaseContext Context(this);
+		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))
+		{
+			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
+			{
+				StateMachineNode->JumpToState(NewState, Context);
+				break;
+			}
+		}
+	}
+}
+
+void UPaperZDAnimInstance::ResetAllStates(FName StateMachineName /* = NAME_None */)
+{
+	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
+	if (AnimClass)
+	{
+		FPaperZDAnimationBaseContext Context(this);
+		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))
+		{
+			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
+			{
+				StateMachineNode->ResetAllStates(Context);
+				break;
 			}
 		}
 	}
@@ -412,9 +474,9 @@ float UPaperZDAnimInstance::GetInstanceAssetPlayerTimeFraction(int32 AssetPlayer
 	if (AnimClass)
 	{
 		FPaperZDAnimNode_PlaySequence* AssetPlayerNode = AnimClass->GetAnimNodeByPropertyIndex<FPaperZDAnimNode_PlaySequence>(this, AssetPlayerIndex);
-		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetAnimSequence()->GetTotalDuration() > 0.0f)
+		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetTotalDuration() > 0.0f)
 		{
-			return AssetPlayerNode->PlaybackTime / AssetPlayerNode->GetAnimSequence()->GetTotalDuration();
+			return AssetPlayerNode->GetPlaybackTime() / AssetPlayerNode->GetTotalDuration();
 		}
 	}
 
@@ -427,9 +489,9 @@ float UPaperZDAnimInstance::GetInstanceAssetPlayerTimeFromEnd(int32 AssetPlayerI
 	if (AnimClass)
 	{
 		FPaperZDAnimNode_PlaySequence* AssetPlayerNode = AnimClass->GetAnimNodeByPropertyIndex<FPaperZDAnimNode_PlaySequence>(this, AssetPlayerIndex);
-		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetAnimSequence()->GetTotalDuration() > 0.0f)
+		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetTotalDuration() > 0.0f)
 		{
-			return AssetPlayerNode->GetAnimSequence()->GetTotalDuration() - AssetPlayerNode->PlaybackTime;
+			return AssetPlayerNode->GetTotalDuration() - AssetPlayerNode->GetPlaybackTime();
 		}
 	}
 
@@ -442,9 +504,9 @@ float UPaperZDAnimInstance::GetInstanceAssetPlayerTimeFromEndFraction(int32 Asse
 	if (AnimClass)
 	{
 		FPaperZDAnimNode_PlaySequence* AssetPlayerNode = AnimClass->GetAnimNodeByPropertyIndex<FPaperZDAnimNode_PlaySequence>(this, AssetPlayerIndex);
-		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetAnimSequence()->GetTotalDuration() > 0.0f)
+		if (AssetPlayerNode && AssetPlayerNode->GetAnimSequence() && AssetPlayerNode->GetTotalDuration() > 0.0f)
 		{
-			return 1.0f - AssetPlayerNode->PlaybackTime / AssetPlayerNode->GetAnimSequence()->GetTotalDuration();
+			return 1.0f - AssetPlayerNode->GetPlaybackTime() / AssetPlayerNode->GetTotalDuration();
 		}
 	}
 
