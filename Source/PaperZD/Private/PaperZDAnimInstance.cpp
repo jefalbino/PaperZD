@@ -149,8 +149,7 @@ APaperZDCharacter* UPaperZDAnimInstance::GetPaperCharacter() const
 FPaperZDAnimStateInfo UPaperZDAnimInstance::GetCurrentStateInfo(FName StateMachineName /* = NAME_None */)
 {
 	FPaperZDAnimStateInfo State;
-	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
-	if (AnimClass)
+	if (UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass()))
 	{
 		FPaperZDAnimationBaseContext Context(this);
 		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))

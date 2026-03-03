@@ -8,13 +8,13 @@ struct PAPERZD_API FPaperZDAnimStateInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
+	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
 	FName StateMachineName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
+	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
 	int32 NodeStateIndex;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
+	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
 	float NodeStateTime;
 
 public:
