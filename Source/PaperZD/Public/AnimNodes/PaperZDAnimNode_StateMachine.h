@@ -97,6 +97,9 @@ public:
 	/* Jump to the state given the state index linked to this state machine. */
 	void JumpToState(const FPaperZDAnimStateInfo NewState, const FPaperZDAnimationBaseContext& Context);
 
+	/* Reset current state index linked to this state machine. */
+	void ResetState(const FPaperZDAnimationBaseContext& Context);
+
 	/** Reset all states of the state machine linked to this node. */
 	void ResetAllStates(const FPaperZDAnimationBaseContext& Context);
 

@@ -176,6 +176,13 @@ void FPaperZDAnimNode_StateMachine::JumpToState(const FPaperZDAnimStateInfo NewS
 	}
 }
 
+void FPaperZDAnimNode_StateMachine::ResetState(const FPaperZDAnimationBaseContext& Context)
+{
+	//Initialize the state
+	FPaperZDAnimationInitContext InitContext(Context.AnimInstance);
+	CurrentStateAnimNode->Initialize(InitContext);
+}
+
 void FPaperZDAnimNode_StateMachine::ResetAllStates(const FPaperZDAnimationBaseContext& Context)
 {
 	if (CachedStateMachine)

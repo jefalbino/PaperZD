@@ -211,6 +211,23 @@ void UPaperZDAnimInstance::JumpToState(FPaperZDAnimStateInfo NewState, FName Sta
 	}
 }
 
+void UPaperZDAnimInstance::ResetState(FName StateMachineName /* = NAME_None */)
+{
+	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
+	if (AnimClass)
+	{
+		FPaperZDAnimationBaseContext Context(this);
+		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))
+		{
+			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
+			{
+				StateMachineNode->ResetState(Context);
+				break;
+			}
+		}
+	}
+}
+
 void UPaperZDAnimInstance::ResetAllStates(FName StateMachineName /* = NAME_None */)
 {
 	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());

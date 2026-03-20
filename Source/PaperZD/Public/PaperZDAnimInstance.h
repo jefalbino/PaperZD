@@ -150,6 +150,9 @@ public:
 	void JumpToState(FPaperZDAnimStateInfo NewState, FName StateMachineName = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	void ResetState(FName StateMachineName = NAME_None);
+
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
 	void ResetAllStates(FName StateMachineName = NAME_None);
 
 	/**
