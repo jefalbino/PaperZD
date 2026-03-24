@@ -43,8 +43,6 @@ public:
 	virtual void OnEvaluate(FPaperZDAnimationPlaybackData& OutData) override;
 
 	virtual UPaperZDAnimSequence* GetAnimSequence() const override { return AnimSequence; }
-	virtual void SetPlaybackTime(float NewPlaybackTime) override;
-	virtual void Reset() override;
 	//~End FPaperZDAnimNode_Base Interface
 
 	/* Set the start position of the playback. */
@@ -64,7 +62,4 @@ public:
 
 	/* Obtain loop animation status. */
 	bool GetLoopAnimation() { return bLoopAnimation; }
-
-private:
-	void InitPositions();
 };

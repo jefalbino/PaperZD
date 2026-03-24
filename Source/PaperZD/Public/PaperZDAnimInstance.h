@@ -99,6 +99,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "PaperZD")
 	bool bAllowTransitionalStates;
 
+	bool bStopAnimation = false;
+
+	float CurrentDeltaTime;
+
 public:
 	//ctor
 	UPaperZDAnimInstance();
@@ -138,6 +142,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "PaperZD")
 	APaperZDCharacter* GetPaperCharacter() const;
 
+	/* Stops the main Tick so the SetState can be called without any race condition. */
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	void StopAnimation();
+
+	/* Resumes the main Tick. */
+	UFUNCTION(BlueprintCallable, Category = "PaperZD")
+	void ResumeAnimation();
+
 	/**
 	 * Changes current execution state and jumps to the given JumpNode name.
 	 * @param JumpName			Name of the jump node we wish to go to.
@@ -146,14 +158,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PaperZD")
 	void JumpToNode(FName JumpName, FName StateMachineName = NAME_None);
 
+	/**
+	 * Changes current execution state to the specified state index and playback time.
+	 * @param StateInfo  Struct with state index and playback time to jump to.
+	 * @param StateMachineName	If specified, the jump to the anim state will be applied to the given state machine.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "PaperZD")
-	void JumpToState(FPaperZDAnimStateInfo NewState, FName StateMachineName = NAME_None);
+	void JumpToState(FPaperZDAnimStateInfo StateInfo, FName StateMachineName = NAME_None);
 
+	/**
+	 * Reset the current animation state so the notifications can work properly
+	 * @param StateMachineName	If specified, the reset of current state will be applied to the given state machine.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "PaperZD")
 	void ResetState(FName StateMachineName = NAME_None);
-
-	UFUNCTION(BlueprintCallable, Category = "PaperZD")
-	void ResetAllStates(FName StateMachineName = NAME_None);
 
 	/**
 	 * Get current animation state and node info being evaluated
@@ -247,8 +265,8 @@ private:
 	float GetDeltaTimeIgnoredDilation(float DeltaTime);
 
 	/* Process the animation nodes. */
-	void ProcessAnimations(float DeltaTime);
+	void ProcessAnimations(float DeltaTime, float PlaybackTime);
 
 	/* Update any animation override that is currently running. */
-	void UpdateAnimationOverrides(float DeltaTime);
+	void UpdateAnimationOverrides(float DeltaTime, float PlaybackTime);
 };

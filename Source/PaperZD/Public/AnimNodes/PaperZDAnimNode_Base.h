@@ -48,11 +48,15 @@ struct FPaperZDAnimationUpdateContext : public FPaperZDAnimationBaseContext
 	/* The effective weight that the updates node will have, in respect to the sink node. */
 	float Weight;
 
+	/* The playback time of this update */
+	float PlaybackTime = -1.0f;
+
 	//ctor
-	FPaperZDAnimationUpdateContext(UPaperZDAnimInstance* InAnimInstance, float InDeltaTime)
+	FPaperZDAnimationUpdateContext(UPaperZDAnimInstance* InAnimInstance, float InDeltaTime, float InPlaybackTime)
 		: FPaperZDAnimationBaseContext(InAnimInstance)
 		, DeltaTime(InDeltaTime)
 		, Weight(1.0f)
+		, PlaybackTime(InPlaybackTime)
 	{}
 
 	//copy constructor
@@ -60,6 +64,7 @@ struct FPaperZDAnimationUpdateContext : public FPaperZDAnimationBaseContext
 		: FPaperZDAnimationBaseContext(OtherContext.AnimInstance)
 		, DeltaTime(OtherContext.DeltaTime)
 		, Weight(OtherContext.Weight)
+		, PlaybackTime(OtherContext.PlaybackTime)
 	{}
 
 	/* Returns a copy of this context, after applying a fractional weight to it. */
@@ -185,12 +190,6 @@ public:
 
 	/* Obtain the AnimSequence bound to this node. */
 	virtual UPaperZDAnimSequence* GetAnimSequence() const { return nullptr; }
-
-	/* Set animation playback time at runtime */
-	virtual void SetPlaybackTime(float NewPlaybackTime) {};
-
-	/* Reset the playback at runtime. */
-	virtual void Reset() {}
 
 protected:
 	/* Initialize method for the AnimNode, called once when the AnimInstance initializes itself. */

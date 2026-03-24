@@ -72,6 +72,13 @@ UFunction* UPaperZDAnimInstance::FindAnimNotifyFunction(FName AnimNotifyName) co
 
 void UPaperZDAnimInstance::Tick(float DeltaTime)
 {
+	if (bStopAnimation)
+	{
+		return;
+	}
+
+	CurrentDeltaTime = DeltaTime;
+
 	SCOPE_CYCLE_COUNTER(STAT_TickAnimInstance);
 	if (bIgnoreTimeDilation)
 	{
@@ -80,7 +87,7 @@ void UPaperZDAnimInstance::Tick(float DeltaTime)
 	}
 
 	//Process the animation nodes
-	ProcessAnimations(DeltaTime);
+	ProcessAnimations(DeltaTime, -1.0f);
 
 	//Call the blueprint method, if it exists
 	{
@@ -146,6 +153,16 @@ APaperZDCharacter* UPaperZDAnimInstance::GetPaperCharacter() const
 	return Cast<APaperZDCharacter>(GetOwningActor());
 }
 
+void UPaperZDAnimInstance::StopAnimation()
+{
+	bStopAnimation = true;
+}
+
+void UPaperZDAnimInstance::ResumeAnimation()
+{
+	bStopAnimation = false;
+}
+
 FPaperZDAnimStateInfo UPaperZDAnimInstance::GetCurrentStateInfo(FName StateMachineName /* = NAME_None */)
 {
 	FPaperZDAnimStateInfo State;
@@ -159,11 +176,15 @@ FPaperZDAnimStateInfo UPaperZDAnimInstance::GetCurrentStateInfo(FName StateMachi
 				FPaperZDAnimNode_Base* CurrentAnimNode = StateMachineNode->GetCurrentAnimNode();
 				if (CurrentAnimNode) {
 					State.StateMachineName = StateMachineName;
-					State.NodeStateIndex = StateMachineNode->GetCurrentStateIndex();
-					State.NodeStateTime = StateMachineNode->GetCurrentStateTime();
+					State.StateIndex = StateMachineNode->GetCurrentStateIndex();
+					State.DeltaTime = CurrentDeltaTime;
 
-					UE_LOG(LogTemp, Warning, TEXT("Animation state index '%d' time '%f'."), State.NodeStateIndex, State.NodeStateTime);
-
+					FPaperZDAnimationPlaybackData PlaybackData;
+        			CurrentAnimNode->Evaluate(PlaybackData);
+        			if (PlaybackData.WeightedAnimations.Num()) 
+        			{
+						State.PlaybackTime	= PlaybackData.WeightedAnimations[0].PlaybackTime - State.DeltaTime;
+					}
 					return State;
 				}
 			}
@@ -193,7 +214,7 @@ void UPaperZDAnimInstance::JumpToNode(FName JumpName, FName StateMachineName /* 
 	}
 }
 
-void UPaperZDAnimInstance::JumpToState(FPaperZDAnimStateInfo NewState, FName StateMachineName /* = NAME_None */)
+void UPaperZDAnimInstance::JumpToState(FPaperZDAnimStateInfo StateInfo, FName StateMachineName /* = NAME_None */)
 {
 	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
 	if (AnimClass)
@@ -203,7 +224,8 @@ void UPaperZDAnimInstance::JumpToState(FPaperZDAnimStateInfo NewState, FName Sta
 		{
 			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
 			{
-				StateMachineNode->JumpToState(NewState, Context);
+				StateMachineNode->JumpToState(StateInfo, Context);
+				ProcessAnimations(StateInfo.DeltaTime, StateInfo.PlaybackTime);
 				break;
 			}
 		}
@@ -227,24 +249,7 @@ void UPaperZDAnimInstance::ResetState(FName StateMachineName /* = NAME_None */)
 	}
 }
 
-void UPaperZDAnimInstance::ResetAllStates(FName StateMachineName /* = NAME_None */)
-{
-	UPaperZDAnimBPGeneratedClass* AnimClass = Cast<UPaperZDAnimBPGeneratedClass>(GetClass());
-	if (AnimClass)
-	{
-		FPaperZDAnimationBaseContext Context(this);
-		for (FPaperZDAnimNode_StateMachine* StateMachineNode : AnimClass->GetStateMachineNodes(this))
-		{
-			if ((StateMachineName != NAME_None && StateMachineNode->GetMachineName() == StateMachineName) || StateMachineName == NAME_None)
-			{
-				StateMachineNode->ResetAllStates(Context);
-				break;
-			}
-		}
-	}
-}
-
-void UPaperZDAnimInstance::ProcessAnimations(float DeltaTime)
+void UPaperZDAnimInstance::ProcessAnimations(float DeltaTime, float PlaybackTime)
 {
 	if (RootNode)
 	{
@@ -252,10 +257,10 @@ void UPaperZDAnimInstance::ProcessAnimations(float DeltaTime)
 			SCOPE_CYCLE_COUNTER(STAT_UpdateAnimGraph);
 
 			//Update any animation override first
-			UpdateAnimationOverrides(DeltaTime);
+			UpdateAnimationOverrides(DeltaTime, PlaybackTime);
 
 			//First do a pass and update any animation node
-			FPaperZDAnimationUpdateContext UpdateContext(this, DeltaTime);
+			FPaperZDAnimationUpdateContext UpdateContext(this, DeltaTime, PlaybackTime);
 			RootNode->Update(UpdateContext);
 
 			//We now clear the processed animation override data for next tick
@@ -275,11 +280,15 @@ void UPaperZDAnimInstance::ProcessAnimations(float DeltaTime)
 	}
 }
 
-void UPaperZDAnimInstance::UpdateAnimationOverrides(float DeltaTime)
+void UPaperZDAnimInstance::UpdateAnimationOverrides(float DeltaTime, float PlaybackTime)
 {
 	for (int32 i = AnimationOverrideHandles.Num() - 1; i >= 0; i--)
 	{
 		FAnimationOverrideHandle& Handle = AnimationOverrideHandles[i];
+		if (PlaybackTime >= 0.0f)
+		{
+			Handle.PlaybackTime = PlaybackTime;
+		}
 		AnimPlayer->TickPlayback(Handle.AnimSequencePtr.Get(), Handle.PlaybackTime, DeltaTime * Handle.PlayRate, false, this);
 
 		//It could happen that after we tick playback of the AnimSequence, the AnimationOverrideHandles array changed somehow,
@@ -344,7 +353,7 @@ void UPaperZDAnimInstance::UpdateSequencerPreview()
 	if (bSequencerOverride)
 	{
 		//We do a 'virtual tick', which won't update anything but force a new evaluation and updates of the animation nodes.
-		ProcessAnimations(0.0f);
+		ProcessAnimations(0.0f, -1.0f);
 	}
 }
 

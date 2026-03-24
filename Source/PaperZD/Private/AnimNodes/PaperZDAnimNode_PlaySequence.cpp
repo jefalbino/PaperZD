@@ -19,7 +19,13 @@ FPaperZDAnimNode_PlaySequence::FPaperZDAnimNode_PlaySequence()
 
 void FPaperZDAnimNode_PlaySequence::OnInitialize(const FPaperZDAnimationInitContext& InitContext)
 {
-	InitPositions();
+	if (AnimSequence)
+	{
+		//Initialize the starting time
+		const float SeqDuration = GetTotalDuration();
+		const float StartTime = PlayRate > 0.0f ? StartPosition : SeqDuration - StartPosition;
+		PlaybackTime = FMath::Clamp(StartTime, 0.0f, SeqDuration);
+	}
 }
 
 void FPaperZDAnimNode_PlaySequence::OnUpdate(const FPaperZDAnimationUpdateContext& UpdateContext)
@@ -28,6 +34,11 @@ void FPaperZDAnimNode_PlaySequence::OnUpdate(const FPaperZDAnimationUpdateContex
 	{
 		//Independent of the weight we have, we should update the playback, to avoid losing sync
 		UPaperZDAnimPlayer* Player = UpdateContext.AnimInstance->GetPlayer();
+
+		if (UpdateContext.PlaybackTime >= 0.0f) 
+		{
+			PlaybackTime = UpdateContext.PlaybackTime;
+		}
 		Player->TickPlayback(AnimSequence, PlaybackTime, UpdateContext.DeltaTime * PlayRate, bLoopAnimation, UpdateContext.AnimInstance, UpdateContext.Weight, false);
 	}
 }
@@ -39,11 +50,6 @@ void FPaperZDAnimNode_PlaySequence::OnEvaluate(FPaperZDAnimationPlaybackData& Ou
 		//Forcefully add the animation as the only present
 		OutData.SetAnimation(AnimSequence, PlaybackTime);
 	}
-}
-
-void FPaperZDAnimNode_PlaySequence::SetPlaybackTime(float NewPlaybackTime)
-{
-	PlaybackTime = NewPlaybackTime;
 }
 
 void FPaperZDAnimNode_PlaySequence::SetStartPosition(float NewStartPosition)
@@ -66,24 +72,4 @@ float FPaperZDAnimNode_PlaySequence::GetTotalDuration() const
 		return AnimSequence->GetTotalDuration();
 	}
 	return 0.0f;
-}
-
-void FPaperZDAnimNode_PlaySequence::Reset()
-{
-	if (AnimSequence)
-	{
-		StartPosition = 0.0f;
-		InitPositions();
-	}
-}
-
-void FPaperZDAnimNode_PlaySequence::InitPositions()
-{
-	if (AnimSequence)
-	{
-		//Initialize the starting time
-		const float SeqDuration = GetTotalDuration();
-		const float StartTime = PlayRate > 0.0f ? StartPosition : SeqDuration - StartPosition;
-		PlaybackTime = FMath::Clamp(StartTime, 0.0f, SeqDuration);
-	}
 }

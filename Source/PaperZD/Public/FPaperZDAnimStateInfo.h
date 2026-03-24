@@ -12,10 +12,13 @@ struct PAPERZD_API FPaperZDAnimStateInfo
 	FName StateMachineName;
 
 	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
-	int32 NodeStateIndex;
+	int32 StateIndex;
 
 	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
-	float NodeStateTime;
+	float PlaybackTime;
+
+	UPROPERTY(Meta = (IgnoreForMemberInitializationTest), EditAnywhere, BlueprintReadWrite, Category = "PaperZD")
+	float DeltaTime;
 
 public:
 	//ctor
