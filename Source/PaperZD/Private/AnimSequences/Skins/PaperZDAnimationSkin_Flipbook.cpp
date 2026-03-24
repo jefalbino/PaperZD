@@ -19,15 +19,17 @@ bool UPaperZDAnimationSkin_Flipbook::ApplySkinToAnimation(const UPaperZDAnimSequ
 		if (SkinsPerAnimation.Contains(AnimSequence))
 		{
 			//Try to find the override for this specific animation and apply it.
-			UPaperFlipbook* Flipbook = SkinsPerAnimation[AnimSequence].AnimationDirections.IsValidIndex(DirectionalIndex) ? SkinsPerAnimation[AnimSequence].AnimationDirections[DirectionalIndex] : nullptr;			
+			UPaperFlipbook* Flipbook = SkinsPerAnimation[AnimSequence].AnimationDirections.IsValidIndex(DirectionalIndex) ? SkinsPerAnimation[AnimSequence].AnimationDirections[DirectionalIndex] : nullptr;
 			if (Sprite->GetFlipbook() != Flipbook)
 			{
 				Sprite->SetFlipbook(Flipbook);
-				return true;
 			}
+
+			//We have applied a skin that should override the animation
+			return true;
 		}
 	}
-	
+
 	//No override found for this animation, should continue normal behavior
 	return false;
 }
