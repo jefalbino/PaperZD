@@ -158,12 +158,11 @@ FPaperZDAnimStateInfo UPaperZDAnimInstance::GetCurrentStateInfo(FName StateMachi
 			{
 				FPaperZDAnimNode_Base* CurrentAnimNode = StateMachineNode->GetCurrentAnimNode();
 				if (CurrentAnimNode) {
-
-					FPaperZDAnimNode_PlaySequence* PlaySequenceNode = static_cast<FPaperZDAnimNode_PlaySequence*>(CurrentAnimNode);
-					
 					State.StateMachineName = StateMachineName;
 					State.NodeStateIndex = StateMachineNode->GetCurrentStateIndex();
 					State.NodeStateTime = StateMachineNode->GetCurrentStateTime();
+
+					UE_LOG(LogTemp, Warning, TEXT("Animation state index '%d' time '%f'."), State.NodeStateIndex, State.NodeStateTime);
 
 					return State;
 				}

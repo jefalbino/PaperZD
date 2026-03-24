@@ -108,7 +108,7 @@ public:
 
 private:
 	/* Sets the given state, triggering any delegate and adding the state's AnimNode to the queue. */
-	void SetState(int32 NewStateIndex, const FPaperZDAnimationBaseContext& Context);
+	void SetState(int32 NewStateIndex, float NodeStateTime, const FPaperZDAnimationBaseContext& Context);
 
 	/* True if the given node can be entered (its a state or a valid conduit). */
 	bool CanEnterNode(int32 NodeIndex, const FNodeEvaluationContext& EvaluationContext) const;

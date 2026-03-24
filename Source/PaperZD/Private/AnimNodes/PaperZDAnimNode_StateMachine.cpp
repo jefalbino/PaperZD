@@ -49,7 +49,7 @@ FPaperZDAnimNode_StateMachine::FPaperZDAnimNode_StateMachine()
 	, CurrentStateTime(0.0f)
 	, CurrentStateAnimNode(nullptr)
 	, CurrentTransitionalAnimNode(nullptr)
-	,bPopTransitionalAnimNode(false)
+	, bPopTransitionalAnimNode(false)
 {}
 
 void FPaperZDAnimNode_StateMachine::OnInitialize(const FPaperZDAnimationInitContext& InitContext)
@@ -61,7 +61,7 @@ void FPaperZDAnimNode_StateMachine::OnInitialize(const FPaperZDAnimationInitCont
 		CachedStateMachine = &GeneratedClass->GetStateMachines()[StateMachineIndex];
 		if (CachedStateMachine->Nodes.IsValidIndex(CachedStateMachine->InitialState))
 		{
-			SetState(CachedStateMachine->InitialState, InitContext);
+			SetState(CachedStateMachine->InitialState, 0.0f, InitContext);
 			check(CurrentStateAnimNode);
 			CurrentStateAnimNode->Initialize(InitContext);
 		}
@@ -90,7 +90,7 @@ void FPaperZDAnimNode_StateMachine::OnUpdate(const FPaperZDAnimationUpdateContex
 		Context.VisitedNodes.Add(CurrentStateIndex);
 		while (const FPaperZDAnimStateMachineLink* NextTransition = CheckValidTransition(CurrentStateIndex, Context))
 		{
-			SetState(NextTransition->TargetNodeIndex, UpdateContext);
+			SetState(NextTransition->TargetNodeIndex, 0.0f, UpdateContext);
 			Context.VisitedNodes.Add(CurrentStateIndex);
 			
 			//Check for transitional graphs
@@ -155,7 +155,7 @@ void FPaperZDAnimNode_StateMachine::JumpToNode(FName Name, const FPaperZDAnimati
 		const int32* pTargetNodeIdx = CachedStateMachine->JumpLinks.Find(Name);
 		if (pTargetNodeIdx)
 		{
-			SetState(*pTargetNodeIdx, Context);
+			SetState(*pTargetNodeIdx, 0.0f, Context);
 
 			//Initialize the state
 			FPaperZDAnimationInitContext InitContext(Context.AnimInstance);
@@ -168,11 +168,7 @@ void FPaperZDAnimNode_StateMachine::JumpToState(const FPaperZDAnimStateInfo NewS
 {
 	if (CachedStateMachine && NewState.NodeStateIndex != INDEX_NONE)
 	{
-		SetState(NewState.NodeStateIndex, Context);
-		CurrentStateAnimNode->SetPlaybackTime(NewState.NodeStateTime);
-
-		// Initialize the state
-		FPaperZDAnimationInitContext InitContext(Context.AnimInstance);
+		SetState(NewState.NodeStateIndex, NewState.NodeStateTime, Context);
 	}
 }
 
@@ -195,7 +191,7 @@ void FPaperZDAnimNode_StateMachine::ResetAllStates(const FPaperZDAnimationBaseCo
 	}
 }
 
-void FPaperZDAnimNode_StateMachine::SetState(int32 NewStateIndex, const FPaperZDAnimationBaseContext& Context)
+void FPaperZDAnimNode_StateMachine::SetState(int32 NewStateIndex, float NodeStateTime, const FPaperZDAnimationBaseContext& Context)
 {
 	//Call the Exit State delegate if it exists
 	if (CachedStateMachine->Nodes.IsValidIndex(CurrentStateIndex) && !CachedStateMachine->Nodes[CurrentStateIndex].OnStateExitEventName.IsNone())
@@ -205,7 +201,9 @@ void FPaperZDAnimNode_StateMachine::SetState(int32 NewStateIndex, const FPaperZD
 
 	CurrentStateIndex = NewStateIndex;
 	CurrentStateAnimNode = Context.GetAnimBPClass()->GetAnimNodeByPropertyIndex(Context.AnimInstance, CachedStateMachine->Nodes[CurrentStateIndex].AnimNodeIndex);
-	CurrentStateTime = 0.0f;
+	CurrentStateTime = NodeStateTime;
+	CurrentStateAnimNode->SetPlaybackTime(NodeStateTime);
+
 	CurrentTransitionalAnimNode = nullptr;
 
 	//Call the Enter State delegate if it exists
