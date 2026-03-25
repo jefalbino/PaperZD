@@ -26,5 +26,7 @@ struct FPaperZDLayerLinkData
 public:
 	//ctor
 	FPaperZDLayerLinkData()
+	: LinkedComponentPtr(nullptr)
+	, LayerIndex(INDEX_NONE)
 	{}
 };

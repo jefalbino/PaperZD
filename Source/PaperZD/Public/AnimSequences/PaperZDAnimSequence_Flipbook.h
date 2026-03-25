@@ -18,6 +18,9 @@ class PAPERZD_API UPaperZDAnimSequence_Flipbook : public UPaperZDAnimSequence
 	//Support for runtime proxy
 	friend class FPaperZDRuntimeEditorProxy;
 
+	//Support for extractor tool
+	friend class SPaperZDExtractFlipbookFromTextureDialog;
+
 	//@DEPRECATED: In favor of the animation data source which now can support multi-directional flipbooks.
 	UPROPERTY()
 	TObjectPtr<UPaperFlipbook> Flipbook_DEPRECATED;

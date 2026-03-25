@@ -8,6 +8,7 @@
 #include "CanvasTypes.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
+#include "IPaperZDEditorProxy.h"
 #include "PackageTools.h"
 #include "PaperFlipbookFactory.h"
 #include "PaperImporterSettings.h"
@@ -16,21 +17,30 @@
 #include "PaperZDAnimBP.h"
 #include "PaperZDAnimBPGeneratedClass.h"
 #include "PaperZDAnimInstance.h"
+#include "PropertyEditorModule.h"
 #include "SPrimaryButton.h"
 #include "SSearchableComboBox.h"
 #include "TextureCompiler.h"
-#include "PropertyEditorModule.h"
+#include "TextureResource.h"
+
 #include "AssetRegistry/AssetRegistryModule.h"
+
 #include "AnimSequences/PaperZDAnimSequence_Flipbook.h"
 #include "AnimSequences/Sources/PaperZDAnimationSource_Flipbook.h"
+#include "AnimSequences/Skins/PaperZDAnimationSkin_Flipbook.h"
+
+#include "Factories/PaperZDAnimationSkinFactory.h"
+
 #include "Kismet2/KismetEditorUtilities.h"
+
+#include "Misc/FeedbackContext.h"
+
 #include "Util/PaperZDEditorSettings.h"
+
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include "Misc/FeedbackContext.h"
-#include "TextureResource.h"
 
 #define LOCTEXT_NAMESPACE "PaperZDTools"
 
@@ -55,148 +65,148 @@ namespace SPaperZDExtractFlipbookFromTextureHelper
             {
                 switch (PivotMode)
                 {
-                case ESpritePivotMode::Top_Left:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Top_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Top_Right:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Left:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Right:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Left:
-                {
-                    PivotPoint = TopLeftUV;
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Right:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y);
-                    break;
-                }
-
-                default:
-                case ESpritePivotMode::Custom:
-                {
-                    if (CustomPivotPoint != FVector2D::ZeroVector)
+                    case ESpritePivotMode::Top_Left:
                     {
-                        PivotPoint = CustomPivotPoint;
-                    }
-                    else
-                    {
-                        Sprite->GetPivotMode(PivotPoint);
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y);
+                        break;
                     }
 
-                    break;
-                }
+                    case ESpritePivotMode::Top_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Top_Right:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Left:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Right:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Left:
+                    {
+                        PivotPoint = TopLeftUV;
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Right:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y);
+                        break;
+                    }
+
+                    default:
+                    case ESpritePivotMode::Custom:
+                    {
+                        if (CustomPivotPoint != FVector2D::ZeroVector)
+                        {
+                            PivotPoint = CustomPivotPoint;
+                        }
+                        else
+                        {
+                            Sprite->GetPivotMode(PivotPoint);
+                        }
+
+                        break;
+                    }
                 }
             }
             else
             {
                 switch (PivotMode)
                 {
-                case ESpritePivotMode::Top_Left:
-                {
-                    PivotPoint = TopLeftUV;
-                    break;
-                }
-
-                case ESpritePivotMode::Top_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Top_Right:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Left:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Center_Right:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y * 0.5f);
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Left:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Center:
-                {
-                    PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y);
-                    break;
-                }
-
-                case ESpritePivotMode::Bottom_Right:
-                {
-                    PivotPoint = TopLeftUV + Dimension;
-                    break;
-                }
-
-                default:
-                case ESpritePivotMode::Custom:
-                {
-                    if (CustomPivotPoint != FVector2D::ZeroVector)
+                    case ESpritePivotMode::Top_Left:
                     {
-                        PivotPoint = CustomPivotPoint;
-                    }
-                    else
-                    {
-                        Sprite->GetPivotMode(PivotPoint);
+                        PivotPoint = TopLeftUV;
+                        break;
                     }
 
-                    break;
-                }
+                    case ESpritePivotMode::Top_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Top_Right:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Left:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Center_Right:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X, TopLeftUV.Y + Dimension.Y * 0.5f);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Left:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X, TopLeftUV.Y + Dimension.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Center:
+                    {
+                        PivotPoint = FVector2D(TopLeftUV.X + Dimension.X * 0.5f, TopLeftUV.Y + Dimension.Y);
+                        break;
+                    }
+
+                    case ESpritePivotMode::Bottom_Right:
+                    {
+                        PivotPoint = TopLeftUV + Dimension;
+                        break;
+                    }
+
+                    default:
+                    case ESpritePivotMode::Custom:
+                    {
+                        if (CustomPivotPoint != FVector2D::ZeroVector)
+                        {
+                            PivotPoint = CustomPivotPoint;
+                        }
+                        else
+                        {
+                            Sprite->GetPivotMode(PivotPoint);
+                        }
+
+                        break;
+                    }
                 }
             }
         }
@@ -251,19 +261,18 @@ void SPaperZDExtractFlipbookFromTextureDialog::Construct(const FArguments& InArg
     DialogSettings->AddToRoot();
 
     FString TextureName = FPaths::GetBaseFilename(SourceTexture->GetPathName());
-    TextureName.ReplaceInline(TEXT("T_"), TEXT(""));
+    if (TextureName.StartsWith(TEXT("T_"), ESearchCase::CaseSensitive))
+    {
+        TextureName.RightChopInline(2);
+    }
 
     DialogSettings->Naming.FlipbookNamingTemplate = "FB_" + TextureName;
     DialogSettings->Naming.SpriteNamingTemplate = "S_" + TextureName;
+    DialogSettings->Naming.AnimationSkinNamingTemplate = "ASK_" + TextureName;
     DialogSettings->Naming.AnimationSequenceNamingTemplate = "ASQ_" + TextureName;
     DialogSettings->Naming.AnimationSourceNamingTemplate = "AS_" + TextureName;
     DialogSettings->Naming.AnimationBlueprintNamingTemplate = "ABP_" + TextureName;
-    DialogSettings->Animation.AnimationSource = nullptr;
-    DialogSettings->Animation.bCreateAnimationBlueprint = false;
-    DialogSettings->Animation.bCreateAnimationSource = false;
-    DialogSettings->Animation.bCreateAnimationSequence = false;
-    DialogSettings->Coloring.ViewportTextureTint = FLinearColor::Gray;
-    DialogSettings->Coloring.BackgroundColor = FLinearColor(0.1f, 0.1f, 0.1f);
+
     InitializeFlipbookExtractSettings(DialogSettings->Flipbooks.Add_GetRef(FPaperZDExtractFlipbookSettings()));
 
     PreviewSelectedFlipbooks();
@@ -651,7 +660,7 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
         Feedback.MakeDialog(true);
 
         FString SpriteNamingTemplate = FlipbookSettings.Naming.SpriteNamingTemplate;
-        if (SpriteNamingTemplate.Find(TEXT("{1}")) == INDEX_NONE)
+        if (SpriteNamingTemplate.Find(TEXT("{1}")) == INDEX_NONE && (FlipbookSettings.Extraction.NumCellsX > 1 || FlipbookSettings.Extraction.NumCellsY > 1))
         {
             SpriteNamingTemplate.Append(TEXT("_{1}"));
         }
@@ -715,6 +724,25 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
 
                 const FVector2D TargetPivotPoint = SPaperZDExtractFlipbookFromTextureHelper::GetResultPivotPoint(NewAsset, FlipbookSettings);
                 NewAsset->SetPivotMode(FlipbookSettings.Sprite.PivotMode, TargetPivotPoint);
+                
+                if (FStructProperty* StructProp = FindFProperty<FStructProperty>(UPaperSprite::StaticClass(), TEXT("RenderGeometry")))
+                {
+                    void* StructPtr = StructProp->ContainerPtrToValuePtr<void>(NewAsset);
+
+                    if (FByteProperty* ByteProp = CastField<FByteProperty>(StructProp->Struct->FindPropertyByName(TEXT("GeometryType"))))
+                    {
+                        ByteProp->SetIntPropertyValue(ByteProp->ContainerPtrToValuePtr<void>(StructPtr),(int64)FlipbookSettings.Sprite.RenderGeometryType);
+                    }
+                }
+
+                if (FProperty* Property = FindFProperty<FProperty>(UPaperSprite::StaticClass(), TEXT("SpriteCollisionDomain")))
+                {
+                    void* ValuePtr = Property->ContainerPtrToValuePtr<void>(NewAsset);
+                    if (FByteProperty* ByteProp = CastField<FByteProperty>(Property))
+                    {
+                        ByteProp->SetIntPropertyValue(ValuePtr, (int64)FlipbookSettings.Sprite.Collision);
+                    }
+                }
 
                 FAssetRegistryModule::AssetCreated(NewAsset);
                 NewAsset->MarkPackageDirty();
@@ -731,6 +759,7 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
             }
         }
 
+        bCancelled |= !FlipbookSettings.Flipbook.bGenerateFlipbook;
         if (!bCancelled)
         {
             Feedback.EnterProgressFrame(1, NSLOCTEXT("TiledIntegration", "TiledIntegration_ExtractSpritesFromTexture", "Generating Flipbook"));
@@ -767,6 +796,11 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
                         {
                             *FramesPerSecondPtr = FlipbookSettings.Flipbook.FramesPerSecond;
                         }
+                    }
+
+                    if (FObjectProperty* Property = FindFProperty<FObjectProperty>(UPaperFlipbook::StaticClass(), TEXT("DefaultMaterial")))
+                    {
+                        Property->SetObjectPropertyValue_InContainer(NewAsset, FlipbookSettings.Flipbook.Material);
                     }
 
                     ExtractedFlipbook.Flipbook = NewAsset;
@@ -848,11 +882,6 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
                     {
                         AnimSequenceSettings = DialogSettings->Animation.AnimationSequenceSettings[AnimationSequenceID];
                     }
-                    else
-                    {
-                        AnimSequenceSettings.Category = TEXT("Default");
-                        AnimSequenceSettings.AnimationSequenceNamingTemplate = TEXT("{0}");
-                    }
 
                     FString AnimationSequenceName = FlipbookSettings.Naming.AnimSequenceNamingTemplate;
                     AnimationSequenceName.ReplaceInline(TEXT("{0}"), *AnimSequenceSettings.AnimationSequenceNamingTemplate);
@@ -881,20 +910,15 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
                         NewAsset->bDirectionalSequence = FlipbooksNum > 1;
                         NewAsset->Category = *AnimSequenceSettings.Category;
 
-                        if (FProperty* Property = FindFProperty<FProperty>(UPaperZDAnimSequence_Flipbook::StaticClass(), TEXT("AnimDataSource")))
-                        {
-                            if (TArray<TObjectPtr<UPaperFlipbook>>* AnimDataSourcePtr = reinterpret_cast<TArray<TObjectPtr<UPaperFlipbook>>*>(Property->ContainerPtrToValuePtr<void>(NewAsset)))
-                            {
-                                (*AnimDataSourcePtr).Empty();
-                                (*AnimDataSourcePtr).Init(nullptr, FlipbooksNum);
-                            }
-                        }
-
-                        AnimSequence = NewAsset;
+                        TArray<FPaperZDFlipbookAnimDataSource>& AnimDataSource = NewAsset->AnimData;
+                        AnimDataSource.Empty();
+                        AnimDataSource.Init(nullptr, FlipbooksNum);
 
                         FAssetRegistryModule::AssetCreated(NewAsset);
                         NewAsset->MarkPackageDirty();
                         NewAsset->PostEditChange();
+
+                        AnimSequence = NewAsset;
 
                         ObjectsToSync.Add(NewAsset);
                         AnimSequences.Add(AnimationSequenceID, AnimSequence);
@@ -903,30 +927,130 @@ void SPaperZDExtractFlipbookFromTextureDialog::ExtractFlipbooks()
 
                 if (AnimSequence)
                 {
-                    if (FProperty* Property = FindFProperty<FProperty>(UPaperZDAnimSequence_Flipbook::StaticClass(), TEXT("AnimDataSource")))
+                    int32 DirectionIndex = FlipbookSettings.Animation.AnimationDirectionIndex;
+                    TArray<FPaperZDFlipbookAnimDataSource>& AnimDataSource = AnimSequence->AnimData;
+                    if (DirectionIndex < 0)
                     {
-                        if (TArray<TObjectPtr<UPaperFlipbook>>* AnimDataSourcePtr = reinterpret_cast<TArray<TObjectPtr<UPaperFlipbook>>*>(Property->ContainerPtrToValuePtr<void>(AnimSequence)))
+                        for (int32 j = 0; j < AnimDataSource.Num(); ++j)
                         {
-                            int32 DirectionIndex = FlipbookSettings.Animation.AnimationSequenceDirectionIndex;
+                            TObjectPtr<UPaperFlipbook>& AnimDataFlipbook = AnimDataSource[j].Animation;
+                            if (AnimDataFlipbook == nullptr)
+                            {
+                                DirectionIndex = j;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (AnimDataSource.IsValidIndex(DirectionIndex))
+                    {
+                        AnimDataSource[DirectionIndex].Animation = Flipbook;
+                    }
+                }
+            }
+        }
+    }
+
+    if (AnimationSource && !bCancelled && !DialogSettings->Animation.AnimationSkinSettings.IsEmpty())
+    {
+        for (int32 i = 0; i < DialogSettings->Animation.AnimationSkinSettings.Num(); ++i)
+        {
+            TMap<UPaperZDAnimSequence_Flipbook*, TArray<TObjectPtr<UPaperFlipbook>>> AnimationSkinSequences;
+            const FPaperZDExtractFlipbooksAnimationSkinSettings& SkinSettings = DialogSettings->Animation.AnimationSkinSettings[i];
+            for (int32 j = 0; j < SkinSettings.AnimationSequences.Num(); ++j)
+            {
+                UPaperZDAnimSequence_Flipbook* AnimationSkinSequence = SkinSettings.AnimationSequences[j];
+                
+                TArray<TObjectPtr<UPaperFlipbook>> AnimationSkinSequenceFlipbooks;
+                AnimationSkinSequenceFlipbooks.Init(nullptr, AnimationSkinSequence->AnimData.Num());
+
+                for (int32 k = 0; k < DialogSettings->Flipbooks.Num(); ++k)
+                {
+                    const FPaperZDExtractFlipbookSettings& FlipbookSettings = DialogSettings->Flipbooks[k];
+                    if (FlipbookSettings.Animation.AnimationSkinID == i && FlipbookSettings.Animation.AnimationSkinSequenceID == j)
+                    {
+                        FPaperZDExtractedFlipbook& ExtractedFlipbook = Flipbooks[k];
+                        if (UPaperFlipbook* Flipbook = ExtractedFlipbook.Flipbook)
+                        {
+                            int32 DirectionIndex = FlipbookSettings.Animation.AnimationDirectionIndex;
                             if (DirectionIndex < 0)
                             {
-                                for (int32 j = 0; j < (*AnimDataSourcePtr).Num(); ++j)
+                                for (int32 l = 0; l < AnimationSkinSequenceFlipbooks.Num(); ++l)
                                 {
-                                    if ((*AnimDataSourcePtr)[j] == nullptr)
+                                    if (AnimationSkinSequenceFlipbooks[l] == nullptr)
                                     {
-                                        DirectionIndex = j;
+                                        DirectionIndex = l;
                                         break;
                                     }
                                 }
                             }
 
-                            if ((*AnimDataSourcePtr).IsValidIndex(DirectionIndex))
+                            if (AnimationSkinSequenceFlipbooks.IsValidIndex(DirectionIndex))
                             {
-                                (*AnimDataSourcePtr)[DirectionIndex] = Flipbook;
+                                AnimationSkinSequenceFlipbooks[DirectionIndex] = Flipbook;
                             }
                         }
                     }
                 }
+
+                if (!AnimationSkinSequenceFlipbooks.IsEmpty())
+                {
+                    AnimationSkinSequences.Add(AnimationSkinSequence, AnimationSkinSequenceFlipbooks);
+                }
+            }
+
+            UPaperZDAnimationSkin_Flipbook* AnimationSkin = SkinSettings.AnimationSkin;
+            if (!AnimationSkin)
+            {
+                FString AnimationSkinName = DialogSettings->Naming.AnimationSkinNamingTemplate;
+                FString Path = FPaths::GetPath(SourceTexture->GetOutermost()->GetName()) / AnimationSkinName;
+
+                FString Name, PackageName, Suffix;
+                AssetToolsModule.Get().CreateUniqueAssetName(Path, Suffix, PackageName, Name);
+                const FString PackagePath = FPackageName::GetLongPackagePath(PackageName);
+                UPackage* Package = CreatePackage(*PackageName);
+
+                if (UPaperZDAnimationSkin_Flipbook* NewAsset = NewObject<UPaperZDAnimationSkin_Flipbook>(Package, UPaperZDAnimationSkin_Flipbook::StaticClass(), *Name, RF_Public | RF_Standalone | RF_Transactional))
+                {
+                    NewAsset->SetAnimationSource(AnimationSource);
+
+                    FAssetRegistryModule::AssetCreated(NewAsset);
+                    ObjectsToSync.Add(NewAsset);
+
+                    AnimationSkin = NewAsset;
+                }
+            }
+
+            if (AnimationSkin)
+            {
+                // Assign the flipbooks to the skin directions
+                for (auto& Pair : AnimationSkin->SkinsPerAnimation)
+                {
+                    const UPaperZDAnimSequence* AnimationSkinSequence = Pair.Key.IsValid() ? Pair.Key.Get() : nullptr;
+                    TArray<TObjectPtr<UPaperFlipbook>>& AnimationSkinSequenceFlipbooks = Pair.Value.AnimationDirections;
+
+                    for (auto& Pair2 : AnimationSkinSequences)
+                    {
+                        UPaperZDAnimSequence_Flipbook* OtherAnimationSkinSequence = Pair2.Key;
+                        TArray<TObjectPtr<UPaperFlipbook>>& OtherAnimationSkinSequenceFlipbooks = Pair2.Value;
+                        if (AnimationSkinSequence == OtherAnimationSkinSequence)
+                        {
+                            for (int32 m = 0; m < AnimationSkinSequenceFlipbooks.Num(); ++m)
+                            {
+                                // Prevent replacing the skin flipbooks if null (only replace the newly created ones)
+                                if (OtherAnimationSkinSequenceFlipbooks[m])
+                                {
+                                    AnimationSkinSequenceFlipbooks[m] = OtherAnimationSkinSequenceFlipbooks[m];
+                                }
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                AnimationSkin->MarkPackageDirty();
+                AnimationSkin->PostEditChange();
             }
         }
     }
@@ -999,13 +1123,12 @@ void SPaperZDExtractFlipbookFromTextureDialog::OnFinishedChangingProperties(cons
             }
         }
 
-        if (PropertyName == GET_MEMBER_NAME_CHECKED(FPaperZDExtractFlipbooksAnimationSettings, AnimationSequenceSettings))
+        if ((PropertyName == GET_MEMBER_NAME_CHECKED(FPaperZDExtractFlipbooksAnimationSettings, AnimationSkinSettings) && PropertyChangedEvent.ChangeType == EPropertyChangeType::ArrayAdd) ||
+            PropertyName == GET_MEMBER_NAME_CHECKED(FPaperZDExtractFlipbooksAnimationSkinSettings, AnimationSkin))
         {
-            if (PropertyChangedEvent.ChangeType == EPropertyChangeType::ArrayAdd)
+            for (auto& AnimationSkinSettings : DialogSettings->Animation.AnimationSkinSettings)
             {
-                FPaperZDExtractFlipbooksAnimationSequenceSettings& AnimationSequenceSettings = DialogSettings->Animation.AnimationSequenceSettings.Last();
-                AnimationSequenceSettings.Category = TEXT("Default");
-                AnimationSequenceSettings.AnimationSequenceNamingTemplate = TEXT("{0}");
+                InitializeAnimationSkinSettings(AnimationSkinSettings);
             }
         }
     }
@@ -1015,29 +1138,44 @@ void SPaperZDExtractFlipbookFromTextureDialog::InitializeFlipbookExtractSettings
 {
     FlipbookSettings.Coloring.OutlineColor = FLinearColor(FMath::FRand(), FMath::FRand(), FMath::FRand());
 
-    FlipbookSettings.Naming.FlipbookNamingTemplate = "{0}_{1}";
-    FlipbookSettings.Naming.FlipbookNamingStartIndex = 0;
-    FlipbookSettings.Naming.SpriteNamingTemplate = "{0}_{1}";
-    FlipbookSettings.Naming.SpriteNamingStartIndex = 0;
-    FlipbookSettings.Naming.AnimSequenceNamingTemplate = "{0}_{1}";
-
-    FlipbookSettings.Flipbook.FramesPerSecond = 15.0f;
-
-    FlipbookSettings.Sprite.PivotMode = ESpritePivotMode::Center_Center;
-    FlipbookSettings.Sprite.CustomPivotModeReference = ESpritePivotMode::Center_Center;
-    FlipbookSettings.Sprite.CustomPivotPoint = FVector2D(0.0f);
-
-    FlipbookSettings.Animation.AnimationSequenceDirectionIndex = -1;
-    FlipbookSettings.Animation.AnimationSequenceID = -1;
-
     FlipbookSettings.Extraction.CellWidth = SourceTexture->GetImportedSize().X;
     FlipbookSettings.Extraction.CellHeight = SourceTexture->GetImportedSize().Y;
-    FlipbookSettings.Extraction.NumCellsX = 0;
-    FlipbookSettings.Extraction.NumCellsY = 0;
-    FlipbookSettings.Extraction.MarginX = 0;
-    FlipbookSettings.Extraction.MarginY = 0;
-    FlipbookSettings.Extraction.SpacingX = 0;
-    FlipbookSettings.Extraction.SpacingY = 0;
+
+    FlipbookSettings.Flipbook.Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Paper2D/MaskedUnlitSpriteMaterial"));
+}
+
+void SPaperZDExtractFlipbookFromTextureDialog::InitializeAnimationSkinSettings(FPaperZDExtractFlipbooksAnimationSkinSettings& SkinSettings)
+{
+    SkinSettings.AnimationSequences.Empty();
+    if (DialogSettings->Animation.AnimationSource || SkinSettings.AnimationSkin)
+    {
+        if (SkinSettings.AnimationSkin)
+        {
+            const auto& SkinsPerAnimation = SkinSettings.AnimationSkin->GetSkinsPerAnimation();
+            for (const auto& Pair : SkinsPerAnimation)
+            {
+                if (Pair.Key.IsValid())
+                {
+                    if (UPaperZDAnimSequence_Flipbook* Sequence = Cast<UPaperZDAnimSequence_Flipbook>(Pair.Key.Get()))
+                    {
+                        SkinSettings.AnimationSequences.Add(Sequence);
+                    }
+                }
+            }
+        }
+        else
+        {
+            TArray<FAssetData> AssetData = IPaperZDEditorProxy::Get()->GetAnimSequencesForSource(DialogSettings->Animation.AnimationSource);
+            for (const FAssetData& Data : AssetData)
+            {
+                UPaperZDAnimSequence_Flipbook* Sequence = Cast<UPaperZDAnimSequence_Flipbook>(Data.GetAsset());
+                if (Sequence)
+                {
+                    SkinSettings.AnimationSequences.Add(Sequence);
+                }
+            }
+        }
+    }
 }
 
 SPaperZDExtractFlipbookFromTextureViewport::~SPaperZDExtractFlipbookFromTextureViewport()

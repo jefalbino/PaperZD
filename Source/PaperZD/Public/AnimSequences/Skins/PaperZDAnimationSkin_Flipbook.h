@@ -28,6 +28,8 @@ struct FPaperZDFlipbookSkinData
 UCLASS()
 class PAPERZD_API UPaperZDAnimationSkin_Flipbook : public UPaperZDAnimationSkin
 {
+	friend class SPaperZDExtractFlipbookFromTextureDialog;
+
 	GENERATED_BODY()
 
 	/* Animation source data to use. */
@@ -40,9 +42,11 @@ public:
 	{}
 
 	//~ Begin UPaperZDAnimationSkin_Flipbook Interface
-	virtual void ApplySkinToAnimation(const UPaperZDAnimSequence* AnimSequence, UPrimitiveComponent* RenderComponent, float DirectionalAngle = 0.0f) override;
+	virtual bool ApplySkinToAnimation(const UPaperZDAnimSequence* AnimSequence, UPrimitiveComponent* RenderComponent, float DirectionalAngle = 0.0f) override;
 	virtual void OnAnimationSourceChanged() override;
 	//~ End UPaperZDAnimationSkin_Flipbook Interface
+
+	FORCEINLINE const TMap<TSoftObjectPtr<UPaperZDAnimSequence>, FPaperZDFlipbookSkinData>& GetSkinsPerAnimation() const { return SkinsPerAnimation; }
 
 private:
 #if WITH_EDITOR

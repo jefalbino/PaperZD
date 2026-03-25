@@ -24,6 +24,12 @@ struct FPaperZDCompositeLayerData
 	/* Offset of the layer against the main render component. */
 	UPROPERTY(EditAnywhere, Category = "Layers")
 	FVector Offset;
+
+public:
+	//ctor
+	FPaperZDCompositeLayerData()
+	: Offset(0.0f)
+	{}
 };
 
 /**

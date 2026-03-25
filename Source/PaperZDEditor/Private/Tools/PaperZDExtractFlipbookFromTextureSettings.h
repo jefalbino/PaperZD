@@ -5,6 +5,8 @@
 #include "PaperZDExtractFlipbookFromTextureSettings.generated.h"
 
 class UPaperZDAnimationSource_Flipbook;
+class UPaperZDAnimSequence_Flipbook;
+class UPaperZDAnimationSkin_Flipbook;
 
 USTRUCT()
 struct FPaperZDExtractFlipbookColoringSettings
@@ -15,6 +17,12 @@ public:
     // The color of the sprite boundary outlines
     UPROPERTY(Category = Coloring, EditAnywhere, meta = (HideAlphaChannel))
     FLinearColor OutlineColor;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookColoringSettings()
+	: OutlineColor(FVector(0.0f))
+	{}
 };
 
 USTRUCT()
@@ -42,6 +50,16 @@ public:
     // The name of the anim sequence that will be created. {0} will get replaced by the generic anim sequence name {1} will get replaced by the sprite number.
     UPROPERTY(Category = Sprite, EditAnywhere)
     FString AnimSequenceNamingTemplate;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookNamingSettings()
+	: FlipbookNamingTemplate("{0}_{1}")
+    , FlipbookNamingStartIndex(0)
+    , SpriteNamingTemplate("{0}_{1}")
+    , SpriteNamingStartIndex(0)
+    , AnimSequenceNamingTemplate("{0}_{1}")
+	{}
 };
 
 USTRUCT()
@@ -50,9 +68,25 @@ struct FPaperZDExtractFlipbookFlipbookSettings
     GENERATED_BODY()
 
 public:
+    // If a flipbook should be generated (if not, only the sprites will get extracted)
+    UPROPERTY(Category = Flipbook, EditAnywhere)
+    bool bGenerateFlipbook;
+
     // The flipbook speed
     UPROPERTY(Category = Flipbook, EditAnywhere)
     float FramesPerSecond;
+
+    // The material for the flipbook
+    UPROPERTY(Category = Flipbook, EditAnywhere)
+    UMaterialInterface* Material;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookFlipbookSettings()
+	: bGenerateFlipbook(true)
+    , FramesPerSecond(15.0f)
+    , Material(nullptr)
+	{}
 };
 
 USTRUCT()
@@ -72,6 +106,24 @@ public:
     // The relative value to add on top of the base pivot point
     UPROPERTY(Category = Sprite, EditAnywhere)
     FVector2D CustomPivotPoint;
+
+    // The collision configuration
+    UPROPERTY(Category = Sprite, EditAnywhere)
+    TEnumAsByte<ESpriteCollisionMode::Type> Collision;
+
+    // The rendering type
+    UPROPERTY(Category = Sprite, EditAnywhere)
+    TEnumAsByte<ESpritePolygonMode::Type> RenderGeometryType;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookSpriteSettings()
+	: PivotMode(ESpritePivotMode::Center_Center)
+    , CustomPivotModeReference(ESpritePivotMode::Center_Center)
+    , CustomPivotPoint(0.0f)
+    , Collision(ESpriteCollisionMode::Use3DPhysics)
+    , RenderGeometryType(ESpritePolygonMode::TightBoundingBox)
+	{}
 };
 
 USTRUCT()
@@ -80,14 +132,31 @@ struct FPaperZDExtractFlipbookAnimationSettings
     GENERATED_BODY()
 
 public:
-    // The id of the animation sequence to use from the extracted flipbook (Must match with the Animation > Animation Sequence Settings > Index) (Leave to -1 to have separate animation sequences)
+    // The id of the animation sequence to use for the extracted flipbook (Must match with the Animation > Animation Sequence Settings > Index) (Leave to -1 to have separate animation sequences)
     UPROPERTY(Category = Animation, EditAnywhere)
     int32 AnimationSequenceID;
 
-    // The direction index of the animation sequence clockwise (leave it to -1 to auto pick)
+    // The direction index of the animation clockwise (leave it to -1 to auto pick)
     // E.g. In an animation sequence of 4 directions: 0 = up, 1 = right, 2 = down, 3 = left
     UPROPERTY(Category = Animation, EditAnywhere)
-    int32 AnimationSequenceDirectionIndex;
+    int32 AnimationDirectionIndex;
+
+    // The id of the animation skin to use for the extracted flipbook (Must match with the Animation > Animation Skin Settings > Index)
+    UPROPERTY(Category = Animation, EditAnywhere)
+    int32 AnimationSkinID;
+
+    // The id of the animation skin sequence to use for the extracted flipbook (Must match with the Animation > Animation Skin Settings > Animation Sequences > Index)
+    UPROPERTY(Category = Animation, EditAnywhere)
+    int32 AnimationSkinSequenceID;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookAnimationSettings()
+	: AnimationSequenceID(INDEX_NONE)
+    , AnimationDirectionIndex(INDEX_NONE)
+    , AnimationSkinID(INDEX_NONE)
+    , AnimationSkinSequenceID(INDEX_NONE)
+	{}
 };
 
 USTRUCT()
@@ -127,6 +196,19 @@ public:
     // Vertical spacing between sprites
     UPROPERTY(Category = Grid, EditAnywhere, meta = (UIMin = 0, ClampMin = 0))
     int32 SpacingY;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbookExtractionSettings()
+	: CellWidth(0)
+    , CellHeight(0)
+    , NumCellsX(0)
+    , NumCellsY(0)
+    , MarginX(0)
+    , MarginY(0)
+    , SpacingX(0)
+    , SpacingY(0)
+	{}
 };
 
 USTRUCT()
@@ -167,6 +249,13 @@ public:
     // The viewport background color
     UPROPERTY(Category = Coloring, EditAnywhere, meta = (HideAlphaChannel))
     FLinearColor BackgroundColor;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbooksColoringSettings()
+	: ViewportTextureTint(FLinearColor::Gray)
+    , BackgroundColor(FLinearColor(0.1f, 0.1f, 0.1f))
+	{}
 };
 
 USTRUCT()
@@ -182,6 +271,10 @@ public:
     // The name of all the sprite that will be created.
     UPROPERTY(Category = Naming, EditAnywhere)
     FString SpriteNamingTemplate;
+
+    // The name of all the animation skins that will be created.
+    UPROPERTY(Category = Naming, EditAnywhere)
+    FString AnimationSkinNamingTemplate;
 
     // The name of all the animation sequences that will be created.
     UPROPERTY(Category = Naming, EditAnywhere)
@@ -209,6 +302,34 @@ public:
     // The naming template used for the animation sequence where {0} will get replaced by the generic anim sequence name.
     UPROPERTY(Category = Animation, EditAnywhere)
     FString AnimationSequenceNamingTemplate;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbooksAnimationSequenceSettings()
+	: Category("Default")
+    , AnimationSequenceNamingTemplate("{0}")
+	{}
+};
+
+USTRUCT()
+struct FPaperZDExtractFlipbooksAnimationSkinSettings
+{
+    GENERATED_BODY()
+
+public:
+    // The animation skin to use (leave empty to create a new one)
+    UPROPERTY(Category = Animation, EditAnywhere)
+    UPaperZDAnimationSkin_Flipbook* AnimationSkin;
+
+    // The animation sequences available for the skin
+    UPROPERTY(Category = Animation, VisibleAnywhere)
+    TArray<UPaperZDAnimSequence_Flipbook*> AnimationSequences;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbooksAnimationSkinSettings()
+	: AnimationSkin(nullptr)
+	{}
 };
 
 USTRUCT()
@@ -217,7 +338,7 @@ struct FPaperZDExtractFlipbooksAnimationSettings
     GENERATED_BODY()
 
 public:
-    // The animation source to use for the created animation blueprint and sequences created
+    // The animation source to use for the created animation blueprint, sequences and/or skins created
     UPROPERTY(Category = Animation, EditAnywhere)
     UPaperZDAnimationSource_Flipbook* AnimationSource;
 
@@ -229,13 +350,26 @@ public:
     UPROPERTY(Category = Animation, EditAnywhere)
     bool bCreateAnimationSource;
 
-    // If a animation sequence should be created with the extracted flipbooks
+    // If one or more animation sequences should be created with the extracted flipbooks
     UPROPERTY(Category = Animation, EditAnywhere)
     bool bCreateAnimationSequence;
 
     // The configuration for the animation sequences created
     UPROPERTY(Category = Animation, EditAnywhere)
     TArray<FPaperZDExtractFlipbooksAnimationSequenceSettings> AnimationSequenceSettings;
+
+    // The configuration for the animation skins created
+    UPROPERTY(Category = Animation, EditAnywhere)
+    TArray<FPaperZDExtractFlipbooksAnimationSkinSettings> AnimationSkinSettings;
+
+public:
+	//ctor
+    FPaperZDExtractFlipbooksAnimationSettings()
+	: AnimationSource(nullptr)
+    , bCreateAnimationBlueprint(false)
+    , bCreateAnimationSource(false)
+    , bCreateAnimationSequence(false)
+	{}
 };
 
 UCLASS()
